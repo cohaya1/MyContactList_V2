@@ -65,17 +65,24 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
 
 
     private void initMapButton() {
-        ImageButton ibList = (ImageButton) findViewById(R.id.imageButtonMap);
-        ibList.setOnClickListener(new View.OnClickListener() {
+        ImageButton ibMap = (ImageButton) findViewById(R.id.imageButtonMap);
+        ibMap.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(ContactActivity.this, com.example.mycontactlistreform.ContactMapActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-            }
-        });
-    }
 
-    private void initSettingsButton() {
+
+                    Intent intent = new Intent(ContactActivity.this,
+                            ContactMapActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+
+                }
+
+            });
+
+        }
+
+
+        private void initSettingsButton() {
         ImageButton ibList = (ImageButton) findViewById(R.id.imageButtonSettings);
         ibList.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

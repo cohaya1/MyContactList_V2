@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_contact_map2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ContactActivity">
+
+    <RelativeLayout
+        android:id="@+id/navbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/navbar_background"
+        android:layout_alignParentBottom="true">
+
+        <ImageButton
+            android:id="@+id/imageButtonList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_toStartOf="@+id/imageButtonMap"
+            android:layout_toLeftOf="@+id/imageButtonMap"
+            app:srcCompat="@drawable/contactlisticon" />
+
+        <ImageButton
+            android:id="@+id/imageButtonMap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            app:srcCompat="@drawable/mapicon" />
+
+        <ImageButton
+            android:id="@+id/imageButtonSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_toEndOf="@id/imageButtonMap"
+            android:layout_toRightOf="@+id/imageButtonMap"
+            app:srcCompat="@drawable/settingsicon" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:text="Address:" />
+
+    <EditText
+        android:id="@+id/editAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textAddress"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:ems="15"
+        android:imeOptions="actionNext"
+        android:inputType="textCapWords" />
+
+    <EditText
+        android:id="@+id/editCity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editAddress"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:ems="8"
+        android:imeOptions="actionNext"
+        android:inputType="textCapWords"
+        android:nextFocusDown="@+id/editState" />
+
+    <EditText
+        android:id="@+id/editState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/editCity"
+        android:layout_toEndOf="@+id/editCity"
+        android:layout_toRightOf="@+id/editCity"
+        android:ems="2"
+        android:imeOptions="actionNext"
+        android:inputType="textCapCharacters"
+        android:maxLength="2"
+        android:nextFocusDown="@+id/editZipCode" />
+
+    <EditText
+        android:id="@+id/editZipCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/editState"
+        android:layout_toEndOf="@+id/editState"
+        android:layout_toRightOf="@+id/editState"
+        android:ems="5"
+        android:imeOptions="actionNext"
+        android:inputType="numberSigned"
+        android:nextFocusDown="@+id/editHome" />
+
+    <Button
+        android:id="@+id/buttonGetLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editCity"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:text="COORDINATES"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textLatitude"
+        android:text="Latitude:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonGetLocation"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp" />
+
+    <EditText
+        android:id="@+id/editLatitude"
+        android:text="None"
+        android:textSize="14sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:layout_alignBottom="@+id/textLatitude"
+        android:layout_below="@+id/buttonGetLocation"
+        android:layout_toRightOf="@+id/textLatitude"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:ems="10"
+        android:inputType="number" />
+
+    <TextView
+        android:id="@+id/textLongitude"
+        android:text="Longitude:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textLatitude"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp" />
+
+    <EditText
+        android:id="@+id/editLongitude"
+        android:text="None"
+        android:textSize="14sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:layout_alignBottom="@+id/textLongitude"
+        android:layout_below="@+id/textLatitude"
+        android:layout_toRightOf="@+id/textLongitude"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:ems="10"
+        android:inputType="number" />
+
+
+    <TextView
+        android:id="@+id/textAccuracy"
+        android:text="Accuracy:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textLongitude"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp" />
+
+    <EditText
+        android:id="@+id/editAccuracy"
+        android:text="None"
+        android:textSize="14sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:layout_alignBottom="@+id/textAccuracy"
+        android:layout_below="@+id/textLongitude"
+        android:layout_toRightOf="@+id/textAccuracy"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:ems="10"
+        android:inputType="number" />
+
+
+</RelativeLayout>
