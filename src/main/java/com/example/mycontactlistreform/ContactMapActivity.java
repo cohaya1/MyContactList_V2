@@ -7,6 +7,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationListener;
@@ -29,6 +31,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
 
 
 import com.google.android.gms.common.ConnectionResult;
@@ -56,7 +59,13 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
     LocationRequest mLocationRequest;
     ArrayList<Contact> contacts = new ArrayList<>();
     Contact currentContact = null;
+    SensorManager sensorManager;
 
+    Sensor accelerometer;
+
+    Sensor magnetometer;
+
+    TextView textDirection;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -93,6 +102,7 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
                     .build();
         }
 
+
         initListButton();
         initSettingsButton();
         initMapButton();
@@ -100,6 +110,7 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
         initGetCoordinates();
 
     }
+
 
     private void initGetCoordinates() {//Get coordinates buttion
         Button ibCoor = (Button) findViewById(R.id.buttonGetCoordinates);
@@ -190,7 +201,7 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
         switch (requestCode) {
             case PERMISSION_REQUEST_LOCATION: {
@@ -220,7 +231,7 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
 
     @Override
     public void onConnectionSuspended(int i) {
-        if ( Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(getBaseContext(),
+        if ( Build.VERSION.SDK_INT >= 28 && ContextCompat.checkSelfPermission(getBaseContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission( getBaseContext(),
                 android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return  ;
@@ -230,7 +241,7 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        if ( Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(getBaseContext(),
+        if ( Build.VERSION.SDK_INT >= 28 && ContextCompat.checkSelfPermission(getBaseContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission( getBaseContext(),
                 android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return  ;
@@ -312,7 +323,7 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
         }
 
         try {
-            if (Build.VERSION.SDK_INT >= 23) {
+            if (Build.VERSION.SDK_INT >= 28) {
                 if (ContextCompat.checkSelfPermission(ContactMapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
                     if (ActivityCompat.shouldShowRequestPermissionRationale(ContactMapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {

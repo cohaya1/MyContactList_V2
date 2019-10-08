@@ -2,9 +2,15 @@ package com.example.mycontactlistreform;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.media.Image;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.view.View;
@@ -16,17 +22,25 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import android.Manifest;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
 
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Calendar;
 
-public class ContactActivity extends AppCompatActivity implements com.example.mycontactlistreform.DatePickerDialog.SaveDateListener{
+public class ContactActivity extends AppCompatActivity implements com.example.mycontactlistreform.DatePickerDialog.SaveDateListener {
 
     private Contact currentContact;
+    final int PERMISSION_REQUEST_PHONE = 102;
+    final int PERMISSION_REQUEST_CAMERA = 103;
+    final int CAMERA_REQUEST = 1888;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +55,152 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         initChangeDateButton();
         initTextChangedEvents();
         initSaveButton();
-
+        initCallFunction();
+        initImageButton();
         Bundle extras = getIntent().getExtras();
-        if(extras != null) {
+        if (extras != null) {
             initContact(extras.getInt("contactid"));
-        }
-        else {
+        } else {
             currentContact = new Contact();
+        }
+
+    }
+
+    private void initImageButton() {
+        ImageButton ib = (ImageButton) findViewById(R.id.imageContact);
+        ib.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (Build.VERSION.SDK_INT >= 23) {
+                    if (ContextCompat.checkSelfPermission(ContactActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(ContactActivity.this, android.Manifest.permission.CAMERA)) {
+                            Snackbar.make(findViewById(R.id.activity_contact), "The app needs permission to take pictures.", Snackbar.LENGTH_INDEFINITE).setAction("Ok", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+
+                                    ActivityCompat.requestPermissions(ContactActivity.this, new String[]{android.Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                                }
+                            }).show();
+                        } else {
+                            ActivityCompat.requestPermissions(ContactActivity.this, new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                        }
+                    } else {
+                        takePhoto();
+                    }
+                } else {
+                    takePhoto();
+                }
+            }
+        });
+    }
+
+    public void takePhoto() {
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, CAMERA_REQUEST);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CAMERA_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+                Bitmap scaledPhoto = Bitmap.createScaledBitmap(photo, 144, 144, true);
+                ImageButton imageContact = (ImageButton) findViewById(R.id.imageContact);
+                imageContact.setImageBitmap(scaledPhoto);
+                currentContact.setPicture(scaledPhoto);
+            }
+        }
+    }
+
+    private void initCallFunction() {
+        EditText editPhone = (EditText) findViewById(R.id.editHome);
+        editPhone.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View arg0) {
+                checkPhonePermission(currentContact.getPhoneNumber());
+                return false;
+            }
+        });
+        EditText editCell = (EditText) findViewById(R.id.editCell);
+        editCell.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View arg0) {
+                checkTextPermission(currentContact.getCellNumber());
+                return false;
+            }
+        });
+    }
+
+    private void checkPhonePermission(String phoneNumber) {
+        if (Build.VERSION.SDK_INT >= 28) {
+            if (ContextCompat.checkSelfPermission(ContactActivity.this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(ContactActivity.this, android.Manifest.permission.CALL_PHONE)) {
+
+                    Snackbar.make(findViewById(R.id.activity_contact), "MyContactList requires this permission to place a call from the app.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View view) {
+
+                            ActivityCompat.requestPermissions(ContactActivity.this, new String[]{android.Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_PHONE);
+                        }
+                    }).show();
+
+                } else {
+                    ActivityCompat.requestPermissions(ContactActivity.this, new String[]{android.Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_PHONE);
+                }
+            } else {
+                callContact(phoneNumber);
+            }
+        } else {
+            callContact(phoneNumber);
+        }
+    }
+
+
+    private void checkTextPermission(String cellNumber) {
+        if (Build.VERSION.SDK_INT >= 28) {
+            if (ContextCompat.checkSelfPermission(ContactActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(ContactActivity.this, android.Manifest.permission.SEND_SMS)) {
+
+                    Snackbar.make(findViewById(R.id.activity_contact), "MyContactList requires this permission to place a call from the app.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View view) {
+
+                            ActivityCompat.requestPermissions(ContactActivity.this, new String[]{android.Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_PHONE);
+                        }
+                    }).show();
+
+                } else {
+                    ActivityCompat.requestPermissions(ContactActivity.this, new String[]{android.Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_PHONE);
+                }
+            } else {
+                txtContact(cellNumber);
+            }
+        } else {
+            txtContact(cellNumber);
+        }
+    }
+
+
+    private void callContact(String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        if (Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(getBaseContext(), android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        } else {
+            startActivity(intent);
+        }
+    }
+
+    private void txtContact(String txtNumber) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("tel:" + txtNumber));
+        if (Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(getBaseContext(), android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        } else {
+            startActivity(intent);
         }
     }
 
@@ -70,19 +223,19 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
             public void onClick(View v) {
 
 
-                    Intent intent = new Intent(ContactActivity.this,
-                            ContactMapActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
+                Intent intent = new Intent(ContactActivity.this,
+                        ContactMapActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
 
-                }
+            }
 
-            });
+        });
 
-        }
+    }
 
 
-        private void initSettingsButton() {
+    private void initSettingsButton() {
         ImageButton ibList = (ImageButton) findViewById(R.id.imageButtonSettings);
         ibList.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -124,8 +277,7 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
                         wasSuccessful = ds.updateContact(currentContact);
                     }
                     ds.close();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     wasSuccessful = false;
                 }
 
@@ -138,16 +290,18 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         });
     }
 
-    private void initTextChangedEvents(){
+    private void initTextChangedEvents() {
         final EditText etContactName = (EditText) findViewById(R.id.editName);
         etContactName.addTextChangedListener(new TextWatcher() {
 
             public void afterTextChanged(Editable s) {
                 currentContact.setContactName(etContactName.getText().toString());
             }
+
             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                 //  Auto-generated method stub
             }
+
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //  Auto-generated method stub
             }
@@ -155,12 +309,15 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
 
         final EditText etStreetAddress = (EditText) findViewById(R.id.editAddress);
         etStreetAddress.addTextChangedListener(new TextWatcher() {
+
             public void afterTextChanged(Editable s) {
                 currentContact.setStreetAddress(etStreetAddress.getText().toString());
             }
+
             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                 //  Auto-generated method stub
             }
+
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //  Auto-generated method stub
             }
@@ -168,12 +325,15 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
 
         final EditText etCity = (EditText) findViewById(R.id.editCity);
         etCity.addTextChangedListener(new TextWatcher() {
+
             public void afterTextChanged(Editable s) {
                 currentContact.setCity(etCity.getText().toString());
             }
+
             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                 //  Auto-generated method stub
             }
+
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //  Auto-generated method stub
             }
@@ -181,12 +341,15 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
 
         final EditText etState = (EditText) findViewById(R.id.editState);
         etState.addTextChangedListener(new TextWatcher() {
+
             public void afterTextChanged(Editable s) {
                 currentContact.setState(etState.getText().toString());
             }
+
             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                 //  Auto-generated method stub
             }
+
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //  Auto-generated method stub
             }
@@ -194,12 +357,15 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
 
         final EditText etZipCode = (EditText) findViewById(R.id.editZipcode);
         etZipCode.addTextChangedListener(new TextWatcher() {
+
             public void afterTextChanged(Editable s) {
                 currentContact.setZipCode(etZipCode.getText().toString());
             }
+
             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                 //  Auto-generated method stub
             }
+
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //  Auto-generated method stub
             }
@@ -210,9 +376,11 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
             public void afterTextChanged(Editable s) {
                 currentContact.setPhoneNumber(etHomePhone.getText().toString());
             }
+
             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                 //  Auto-generated method stub
             }
+
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //  Auto-generated method stub
             }
@@ -223,9 +391,11 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
             public void afterTextChanged(Editable s) {
                 currentContact.setCellNumber(etCellPhone.getText().toString());
             }
+
             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                 //  Auto-generated method stub
             }
+
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //  Auto-generated method stub
             }
@@ -236,9 +406,11 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
             public void afterTextChanged(Editable s) {
                 currentContact.setEMail(etEmail.getText().toString());
             }
+
             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
                 //  Auto-generated method stub
             }
+
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 //  Auto-generated method stub
             }
@@ -260,7 +432,8 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         EditText editEmail = (EditText) findViewById(R.id.editEMail);
         Button buttonChange = (Button) findViewById(R.id.btnBirthday);
         Button buttonSave = (Button) findViewById(R.id.buttonSave);
-
+        ImageButton picture = (ImageButton) findViewById(R.id.imageContact);
+        picture.setEnabled(enabled);
         editName.setEnabled(enabled);
         editAddress.setEnabled(enabled);
         editCity.setEnabled(enabled);
@@ -274,8 +447,11 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
 
         if (enabled) {
             editName.requestFocus();
-        }
-        else {
+            editPhone.setInputType(InputType.TYPE_CLASS_PHONE);
+            editCell.setInputType(InputType.TYPE_CLASS_PHONE);
+        } else {
+            editPhone.setInputType(InputType.TYPE_NULL);
+            editCell.setInputType(InputType.TYPE_NULL);
             ScrollView s = (ScrollView) findViewById(R.id.scrollView);
             s.fullScroll(ScrollView.FOCUS_UP);
             s.clearFocus();
@@ -297,14 +473,14 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
     }
 
     private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         EditText editName = (EditText) findViewById(R.id.editName);
         imm.hideSoftInputFromWindow(editName.getWindowToken(), 0);
         EditText editAddress = (EditText) findViewById(R.id.editAddress);
         imm.hideSoftInputFromWindow(editAddress.getWindowToken(), 0);
         EditText editCity = (EditText) findViewById(R.id.editCity);
         imm.hideSoftInputFromWindow(editCity.getWindowToken(), 0);
-        EditText editState= (EditText) findViewById(R.id.editState);
+        EditText editState = (EditText) findViewById(R.id.editState);
         imm.hideSoftInputFromWindow(editState.getWindowToken(), 0);
         EditText editZip = (EditText) findViewById(R.id.editZipcode);
         imm.hideSoftInputFromWindow(editZip.getWindowToken(), 0);
@@ -315,6 +491,7 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         EditText editEMail = (EditText) findViewById(R.id.editEMail);
         imm.hideSoftInputFromWindow(editEMail.getWindowToken(), 0);
     }
+
     private void initContact(int id) {
 
         ContactDataSource ds = new ContactDataSource(ContactActivity.this);
@@ -322,8 +499,7 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
             ds.open();
             currentContact = ds.getSpecificContact(id);
             ds.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Toast.makeText(this, "Load Contact Failed", Toast.LENGTH_LONG).show();
         }
 
@@ -346,8 +522,16 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         editCell.setText(currentContact.getCellNumber());
         editEmail.setText(currentContact.getEMail());
 
-        birthDay.setText(DateFormat.format("MM/dd/yyyy", currentContact.getBirthday().getTimeInMillis ()).toString());
+        birthDay.setText(DateFormat.format("MM/dd/yyyy", currentContact.getBirthday().getTimeInMillis()).toString());
+        ImageButton picture = (ImageButton) findViewById(R.id.imageContact);
+        if (currentContact.getPicture() != null) {
+            picture.setImageBitmap(currentContact.getPicture());
+        }
+        else {
+            picture.setImageResource(R.drawable.photoicon);
+        }
     }
+
 
 
     @Override
@@ -357,4 +541,25 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         currentContact.setBirthday(selectedTime);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case PERMISSION_REQUEST_PHONE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(ContactActivity.this, "You may now call from this app.", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(ContactActivity.this, "You will not be able to make calls from this app", Toast.LENGTH_LONG).show();
+                }
+            }
+            case PERMISSION_REQUEST_CAMERA: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    takePhoto();
+                } else {
+                    Toast.makeText(ContactActivity.this, "You will not be able to save contact pictures from this app", Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+        }
+    }
 }

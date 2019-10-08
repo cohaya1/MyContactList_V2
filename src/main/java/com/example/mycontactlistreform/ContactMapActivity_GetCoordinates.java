@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+
 import com.google.android.material.snackbar.Snackbar;
 
 public class ContactMapActivity_GetCoordinates extends AppCompatActivity {
@@ -222,7 +223,7 @@ public class ContactMapActivity_GetCoordinates extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[],
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
 
         switch (requestCode) {

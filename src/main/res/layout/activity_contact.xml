@@ -85,6 +85,7 @@
             android:layout_marginRight="20dp"
             android:layout_marginEnd="20dp" />
 
+
     </RelativeLayout>
 
 
@@ -115,6 +116,19 @@
                 android:layout_marginStart="10dp"
                 android:id="@+id/textContact" />
 
+            <ImageButton
+                android:id="@+id/imageContact"
+                android:layout_width="49dp"
+                android:layout_height="64dp"
+                android:layout_alignTop="@+id/textContact"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginEnd="0dp"
+                android:layout_marginRight="0dp"
+                android:src="@drawable/photoicon" />
+
+
+
             <EditText
                 android:id="@+id/editName"
                 android:layout_width="wrap_content"
@@ -123,6 +137,8 @@
                 android:layout_alignParentStart="true"
                 android:layout_marginLeft="10dp"
                 android:layout_marginStart="10dp"
+                android:layout_toLeftOf="@+id/imageContact"
+                android:layout_toStartOf="@+id/imageContact"
                 android:layout_below="@+id/textContact"
                 android:ems="14"
                 android:imeOptions="actionNext"

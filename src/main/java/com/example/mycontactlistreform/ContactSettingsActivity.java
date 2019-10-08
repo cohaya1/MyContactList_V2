@@ -14,6 +14,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.widget.ScrollView;
 
+
+
 import static java.security.AccessController.getContext;
 
 public class ContactSettingsActivity extends AppCompatActivity {

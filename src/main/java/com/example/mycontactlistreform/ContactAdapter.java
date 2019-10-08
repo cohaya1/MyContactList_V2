@@ -2,6 +2,7 @@ package com.example.mycontactlistreform;
 
 import android.view.LayoutInflater;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -11,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
+
+
 
 public class ContactAdapter extends ArrayAdapter<Contact> {
 
@@ -60,9 +63,12 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
             contactCity.setText(contact.getCity());
             contactState.setText(contact.getState());
             contactZip.setText(contact.getZipCode());
+//Create ImageView for the best friend icon
+            ImageView bestFriendLabel  = (ImageView)v.findViewById(R.id.buttonFavContact);
 
-            //showFav(position, convertView, adapterContext, contact);
-            //b.setVisibility(View.INVISIBLE);
+            //Set best friend star icon to invisible
+            bestFriendLabel.setVisibility(View.INVISIBLE);
+
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -73,63 +79,7 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
 
     }
 
-    public void showFav(final int position, final View convertView, final Context context,
-                        final Contact contact) {
-        View v = convertView;
-        final ImageButton ib = (ImageButton) v.findViewById(R.id.buttonFavContact);
-        if (!contact.getBff()) {
-            ib.setVisibility(View.VISIBLE);
-            ib.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!contact.getBff()) {
-                        contact.setBff(true);
-                        updateBff(contact, context);
-                        ib.setVisibility(View.VISIBLE);
 
-                    } else {
-                        contact.setBff(false);
-                        updateBff(contact, context);
-                        ib.setVisibility(View.INVISIBLE);
-
-                    }
-
-                }
-
-            });
-
-        }
-        else {
-            hideFav(position, convertView, context);
-
-        }
-
-
-    }
-
-    public void updateBff(Contact contactToUpdate, Context context) {
-        ContactDataSource db = new ContactDataSource(context);
-        try {
-            db.open();
-            db.updateContact(contactToUpdate);
-            db.close();
-
-        }
-        catch (Exception e) {
-            Toast.makeText(adapterContext, "Update Contact Failed", Toast.LENGTH_LONG).show();
-
-        }
-        this.notifyDataSetChanged();
-
-    }
-
-    public void hideFav(int position, View convertView, Context context) {
-        View v = convertView;
-        final ImageButton ib = v.findViewById(R.id.buttonFavContact);
-        ib.setVisibility(View.INVISIBLE);
-        ib.setOnClickListener(null);
-
-    }
 
     public void showDelete(final int position, final View convertView, final Context context,
                            final Contact contact) {
@@ -175,7 +125,7 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
 
     public void hideDelete(int position, View convertView, Context context) {
         View v = convertView;
-        final Button b = v.findViewById(R.id.buttonDeleteContact);
+        final Button b = (Button) v.findViewById(R.id.buttonDeleteContact);
         b.setVisibility(View.INVISIBLE);
         b.setOnClickListener(null);
 

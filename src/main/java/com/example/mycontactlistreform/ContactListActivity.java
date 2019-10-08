@@ -2,8 +2,12 @@ package com.example.mycontactlistreform;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.Context;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -11,7 +15,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.view.View;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
+
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +41,24 @@ public class ContactListActivity extends AppCompatActivity {
         initAddContactButton();
         initDeleteButton();
         initAddContactButton();
-        initAddFavButton();
+
+
+        BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                double batteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+                double levelScale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
+                int batteryPercent = (int) Math.floor(batteryLevel / levelScale * 100);
+                TextView textBatteryState = (TextView) findViewById(R.id.textBatteryLevel);
+                textBatteryState.setText(batteryPercent + "%");
+            }
+        };
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        registerReceiver(batteryReceiver, filter);
 
     }
+
 
     @Override
     public void onResume() {
@@ -58,15 +80,13 @@ public class ContactListActivity extends AppCompatActivity {
                 adapter = new ContactAdapter(this, contacts);
                 listView.setAdapter(adapter);
 
-            }
-            else {
+            } else {
                 Intent intent = new Intent(ContactListActivity.this, ContactActivity.class);
                 startActivity(intent);
 
             }
 
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Toast.makeText(this, "Error retrieving contacts", Toast.LENGTH_LONG).show();
 
         }
@@ -110,40 +130,23 @@ public class ContactListActivity extends AppCompatActivity {
     }
 
     private void initItemClick() {
-        ListView listView = (ListView) findViewById(R.id.lvContacts);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ListView listview = (ListView) findViewById(R.id.lvContacts);
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
-            public void onItemClick(AdapterView<?> parent, View itemClicked, int position,
-                                    long id) {
+            public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
                 Contact selectedContact = contacts.get(position);
                 if (isDeleting) {
                     adapter.showDelete(position, itemClicked, ContactListActivity.this, selectedContact);
-                    //adapter.showFav(position, itemClicked, ContactListActivity.this, selectedContact);
+                } else {
 
-                }
-                else if (isAddingFavs) {
-                    adapter.showFav(position, itemClicked, ContactListActivity.this, selectedContact);
-
-                }
-                else if (isDeleting && isAddingFavs) {
-                    adapter.showDelete(position, itemClicked, ContactListActivity.this, selectedContact);
-                    adapter.showFav(position, itemClicked, ContactListActivity.this, selectedContact);
-
-                }
-                else {
-                    Intent intent = new Intent(ContactListActivity.this,
-                            ContactActivity.class);
+                    Intent intent = new Intent(ContactListActivity.this, ContactActivity.class);
                     intent.putExtra("contactid", selectedContact.getContactID());
                     startActivity(intent);
-
                 }
 
-
-
             }
-
         });
-
     }
 
     private void initAddContactButton() {
@@ -171,8 +174,7 @@ public class ContactListActivity extends AppCompatActivity {
                     isDeleting = false;
                     adapter.notifyDataSetChanged();
 
-                }
-                else {
+                } else {
                     deleteButton.setText("Done Deleting");
                     isDeleting = true;
                     //adapter.showFav(position, itemClicked, ContactListActivity.this, selectedContact);
@@ -184,23 +186,5 @@ public class ContactListActivity extends AppCompatActivity {
         });
 
     }
-
-    private void initAddFavButton() {
-        final Button addFavButton = (Button) findViewById(R.id.buttonAddFav);
-        addFavButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isAddingFavs) {
-                    addFavButton.setText("Add Favs");
-                    isAddingFavs = false;
-
-                }
-                else {
-                    addFavButton.setText("Done Adding Favs");
-                    isAddingFavs = true;
-                }
-            }
-        });
-    }
-
 }
+
