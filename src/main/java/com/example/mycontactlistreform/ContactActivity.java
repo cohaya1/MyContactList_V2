@@ -55,7 +55,7 @@ public class ContactActivity extends AppCompatActivity  implements com.example.m
         initChangeDateButton();
         initTextChangedEvents();
         initSaveButton();
-       // initCallFunction();
+        initCallFunction();
         initTextFunction();
         initImageButton();
         Bundle extras = getIntent().getExtras();
@@ -111,7 +111,7 @@ public class ContactActivity extends AppCompatActivity  implements com.example.m
             }
         }
     }
-/*
+
     private void initCallFunction() {
         EditText editPhone = (EditText) findViewById(R.id.editHome);
         editPhone.setOnLongClickListener(new View.OnLongClickListener() {
@@ -121,17 +121,10 @@ public class ContactActivity extends AppCompatActivity  implements com.example.m
                 return false;
             }
         });
-        EditText editCell = (EditText) findViewById(R.id.editCell);
-        editCell.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View arg0) {
-                checkTextPermission(currentContact.getCellNumber());
-                return false;
-            }
-        });
+
     }
 
- */
+
 @Override
 public void onRequestPermissionsResult(int requestCode,
                                        @NonNull String permissions[], @NonNull int[] grantResults) {
@@ -171,14 +164,7 @@ public void onRequestPermissionsResult(int requestCode,
 }
 private void initTextFunction() {
 
-    EditText editPhone = (EditText) findViewById(R.id.editHome);
-    editPhone.setOnLongClickListener(new View.OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View arg0) {
-            checkTextPermission(currentContact.getPhoneNumber());
-            return false;
-        }
-    });
+
 
     EditText editCell = (EditText) findViewById(R.id.editCell);
     editCell.setOnLongClickListener(new View.OnLongClickListener() {
@@ -191,7 +177,7 @@ private void initTextFunction() {
 
 }
 
-/*
+
     private void checkPhonePermission(String phoneNumber) {
         if (Build.VERSION.SDK_INT >= 28) {
             if (ContextCompat.checkSelfPermission(ContactActivity.this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -217,7 +203,7 @@ private void initTextFunction() {
             callContact(phoneNumber);
         }
     }
-*/
+
 private void checkTextPermission(String phoneNumber) {
     if (Build.VERSION.SDK_INT >= 23) {
         if (ContextCompat.checkSelfPermission(ContactActivity.this,
@@ -254,7 +240,7 @@ private void checkTextPermission(String phoneNumber) {
     }
 }
 
-/*
+
     private void callContact(String phoneNumber) {
         Intent intent = new Intent(Intent.ACTION_CALL);
         intent.setData(Uri.parse("tel:" + phoneNumber));
@@ -265,7 +251,7 @@ private void checkTextPermission(String phoneNumber) {
         }
     }
 
- */
+
 
     private void sendText(String phoneNumber) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
