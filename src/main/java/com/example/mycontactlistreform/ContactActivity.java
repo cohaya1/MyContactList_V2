@@ -35,13 +35,13 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.Calendar;
 
-public class ContactActivity extends AppCompatActivity implements com.example.mycontactlistreform.DatePickerDialog.SaveDateListener {
+public class ContactActivity extends AppCompatActivity  implements com.example.mycontactlistreform.DatePickerDialog.SaveDateListener {
 
     private Contact currentContact;
     final int PERMISSION_REQUEST_PHONE = 102;
     final int PERMISSION_REQUEST_CAMERA = 103;
     final int CAMERA_REQUEST = 1888;
-
+    final int PERMISSION_REQUEST_SMS = 104;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +55,8 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         initChangeDateButton();
         initTextChangedEvents();
         initSaveButton();
-        initCallFunction();
+       // initCallFunction();
+        initTextFunction();
         initImageButton();
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -110,7 +111,7 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
             }
         }
     }
-
+/*
     private void initCallFunction() {
         EditText editPhone = (EditText) findViewById(R.id.editHome);
         editPhone.setOnLongClickListener(new View.OnLongClickListener() {
@@ -130,6 +131,67 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         });
     }
 
+ */
+@Override
+public void onRequestPermissionsResult(int requestCode,
+                                       @NonNull String permissions[], @NonNull int[] grantResults) {
+
+    switch (requestCode) {
+        case PERMISSION_REQUEST_PHONE: {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(ContactActivity.this,
+                        "You may now call from this app.", Toast.LENGTH_LONG).show();
+            }
+            else {
+                Toast.makeText(ContactActivity.this,
+                        "You will not be able to make calls from this app", Toast.LENGTH_LONG).show();
+            }
+        }
+        case PERMISSION_REQUEST_CAMERA: {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                takePhoto();
+            } else {
+                Toast.makeText(ContactActivity.this,
+                        "You will not be able to save contact pictures from this app", Toast.LENGTH_LONG).show();
+            }
+            return;
+        }
+        case PERMISSION_REQUEST_SMS: {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(ContactActivity.this,
+                        "You may now text from this app.", Toast.LENGTH_LONG).show();
+            }
+            else {
+                Toast.makeText(ContactActivity.this,
+                        "You will not be able to text from this app", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+}
+private void initTextFunction() {
+
+    EditText editPhone = (EditText) findViewById(R.id.editHome);
+    editPhone.setOnLongClickListener(new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View arg0) {
+            checkTextPermission(currentContact.getPhoneNumber());
+            return false;
+        }
+    });
+
+    EditText editCell = (EditText) findViewById(R.id.editCell);
+    editCell.setOnLongClickListener(new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View arg0) {
+            checkTextPermission(currentContact.getCellNumber());
+            return false;
+        }
+    });
+
+}
+
+/*
     private void checkPhonePermission(String phoneNumber) {
         if (Build.VERSION.SDK_INT >= 28) {
             if (ContextCompat.checkSelfPermission(ContactActivity.this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
@@ -155,35 +217,44 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
             callContact(phoneNumber);
         }
     }
+*/
+private void checkTextPermission(String phoneNumber) {
+    if (Build.VERSION.SDK_INT >= 23) {
+        if (ContextCompat.checkSelfPermission(ContactActivity.this,
+                Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
 
+            if (ActivityCompat.shouldShowRequestPermissionRationale(ContactActivity.this,
+                    Manifest.permission.SEND_SMS)) {
 
-    private void checkTextPermission(String cellNumber) {
-        if (Build.VERSION.SDK_INT >= 28) {
-            if (ContextCompat.checkSelfPermission(ContactActivity.this, android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
-
-                if (ActivityCompat.shouldShowRequestPermissionRationale(ContactActivity.this, android.Manifest.permission.SEND_SMS)) {
-
-                    Snackbar.make(findViewById(R.id.activity_contact), "MyContactList requires this permission to place a call from the app.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
-
-                        @Override
-                        public void onClick(View view) {
-
-                            ActivityCompat.requestPermissions(ContactActivity.this, new String[]{android.Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_PHONE);
-                        }
-                    }).show();
-
-                } else {
-                    ActivityCompat.requestPermissions(ContactActivity.this, new String[]{android.Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_PHONE);
-                }
-            } else {
-                txtContact(cellNumber);
+                Snackbar.make(findViewById(R.id.activity_contact),
+                        "MyContactList requires this permission to send a text from the app.",
+                        Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ActivityCompat.requestPermissions(
+                                ContactActivity.this,
+                                new String[]{Manifest.permission.SEND_SMS},
+                                PERMISSION_REQUEST_SMS);
+                    }
+                })
+                        .show();
             }
-        } else {
-            txtContact(cellNumber);
+            else {
+                ActivityCompat.requestPermissions(ContactActivity.this,
+                        new String[]{Manifest.permission.SEND_SMS},
+                        PERMISSION_REQUEST_SMS);
+            }
+        }
+        else {
+            sendText(phoneNumber);
         }
     }
+    else {
+        sendText(phoneNumber);
+    }
+}
 
-
+/*
     private void callContact(String phoneNumber) {
         Intent intent = new Intent(Intent.ACTION_CALL);
         intent.setData(Uri.parse("tel:" + phoneNumber));
@@ -194,12 +265,16 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         }
     }
 
-    private void txtContact(String txtNumber) {
+ */
+
+    private void sendText(String phoneNumber) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Uri.parse("tel:" + txtNumber));
-        if (Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(getBaseContext(), android.Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+        intent.setData(Uri.parse("sms:" + phoneNumber));
+        if ( Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(getBaseContext(),
+                Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
             return;
-        } else {
+        }
+        else {
             startActivity(intent);
         }
     }
@@ -541,25 +616,5 @@ public class ContactActivity extends AppCompatActivity implements com.example.my
         currentContact.setBirthday(selectedTime);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
 
-        switch (requestCode) {
-            case PERMISSION_REQUEST_PHONE: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(ContactActivity.this, "You may now call from this app.", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(ContactActivity.this, "You will not be able to make calls from this app", Toast.LENGTH_LONG).show();
-                }
-            }
-            case PERMISSION_REQUEST_CAMERA: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    takePhoto();
-                } else {
-                    Toast.makeText(ContactActivity.this, "You will not be able to save contact pictures from this app", Toast.LENGTH_LONG).show();
-                }
-                return;
-            }
-        }
-    }
 }
